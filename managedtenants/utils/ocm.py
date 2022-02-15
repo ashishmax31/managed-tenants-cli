@@ -102,7 +102,21 @@ class OcmCli:
         addon = self._addon_from_metadata(metadata)
         return self._post("/api/clusters_mgmt/v1/addons", json=addon)
 
+    def _addon_exists(self, addon_id):
+        try:
+            self._get(f"/api/clusters_mgmt/v1/addons/{addon_id}")
+            return True
+        except OCMAPIError:
+            return False
+
     def add_addon_version(self, imageset, metadata):
+        if self._addon_exists(metadata.get("id")):
+            return self._add_addon_version(imageset, metadata)
+        # Create the addon first
+        self.add_addon(metadata)
+        return self._add_addon_version(imageset, metadata)
+
+    def _add_addon_version(self, imageset, metadata):
         addon = self._addon_from_imageset(imageset, metadata)
         return self._post(
             f'/api/clusters_mgmt/v1/addons/{metadata.get("id")}/versions',

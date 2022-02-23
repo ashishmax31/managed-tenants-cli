@@ -243,10 +243,6 @@ class OcmCli:
         self._raise_for_status(
             response, reqs_method=reqs_method, url=url, **kwargs
         )
-
-        if response.headers.get("Content-Type") == "application/json":
-            return response.json()
-
         return response
 
     def _post(self, path, **kwargs):
@@ -265,7 +261,7 @@ class OcmCli:
         items = []
         page = 1
         while True:
-            result = self._get(path, params={"page": str(page)})
+            result = self._get(path, params={"page": str(page)}).json()
 
             items.extend(result["items"])
             total = result["total"]
